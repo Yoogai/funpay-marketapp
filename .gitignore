@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.log
+.env
+.env.*
+.venv/
+venv/
+storage/
+marketapp_smart_rent_secrets.json
+*.session
+*.session-journal
