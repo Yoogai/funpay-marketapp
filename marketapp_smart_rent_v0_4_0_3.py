@@ -1145,10 +1145,16 @@ def init_telegram(cardinal, *args):
                 VENDOR_DIR.mkdir(parents=True, exist_ok=True)
                 cmd = [
                     sys.executable, "-m", "pip", "install", "-U",
+                    "--prefer-binary",
+                    "--timeout", "120",
+                    "--retries", "8",
                     "--target", str(VENDOR_DIR.resolve()),
                     "marketapp-api", "-c", constraints
                 ]
-                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                # На медленных VPS установка pytoniq/curl_cffi и других wheel-зависимостей
+                # может занимать заметно больше трёх минут. 15 минут — это общий
+                # предохранитель процесса, а сетевой timeout/retries задаются pip выше.
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
                 try:
                     os.unlink(constraints)
                 except OSError:
