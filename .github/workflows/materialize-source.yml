@@ -1,0 +1,38 @@
+name: Materialize source
+
+on:
+  push:
+    paths:
+      - '.github/payloads/marketapp_smart_rent_v0_4_0_3.py.zlib.b64'
+      - '.github/workflows/materialize-source.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode current plugin source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, zlib
+          src = Path('.github/payloads/marketapp_smart_rent_v0_4_0_3.py.zlib.b64')
+          out = Path('marketapp_smart_rent_v0_4_0_3.py')
+          out.write_bytes(zlib.decompress(base64.b64decode(src.read_bytes())))
+          PY
+          python -m py_compile marketapp_smart_rent_v0_4_0_3.py
+      - name: Commit materialized source
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add marketapp_smart_rent_v0_4_0_3.py
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Add MarketApp Smart Rent v0.4.0.3 source'
+          git push
